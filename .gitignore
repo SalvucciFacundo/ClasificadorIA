@@ -5,7 +5,6 @@ __pycache__/
 # Builds and executables
 build/
 dist/
-*.spec
 
 # Dataset and Images (User request)
 dataset_base/

@@ -1,0 +1,8 @@
+torch
+torchvision
+flask
+pywebview
+Pillow
+scikit-learn
+pyinstaller
+requests

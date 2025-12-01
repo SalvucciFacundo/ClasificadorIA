@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clasificador IA vs Real</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <header class="glass-header">
+            <div class="logo">
+                <h1>Clasificador <span class="highlight">IA</span></h1>
+            </div>
+            <nav>
+                <button class="nav-btn active" data-tab="classify">Clasificación</button>
+                <button class="nav-btn" data-tab="stats">Estadísticas</button>
+            </nav>
+            <div class="status-indicator" id="status-indicator">
+                <span class="dot"></span> Sistema Listo
+            </div>
+        </header>
+
+        <main class="content-area">
+            <!-- Classification Tab -->
+            <section id="classify-tab" class="tab-content active">
+                <div class="toolbar">
+                    <div class="actions-left">
+                        <input type="file" id="file-upload" multiple accept="image/*" style="display: none;">
+                        <button id="upload-btn" class="action-btn primary">+ Cargar Imágenes</button>
+                    </div>
+                    <div class="actions-right">
+                        <button id="refresh-btn" class="action-btn secondary">↻ Recargar</button>
+                        <button id="accept-btn" class="action-btn success">✓ Aceptar Clasificación</button>
+                    </div>
+                </div>
+
+                <div class="split-view">
+                    <!-- IA Column -->
+                    <div class="column ia-column" id="col-ia" ondrop="drop(event, 'ia')" ondragover="allowDrop(event)">
+                        <div class="column-header">
+                            <h2>IA Detectada <span class="count-badge" id="count-ia">0</span></h2>
+                        </div>
+                        <div class="column-content" id="list-ia">
+                            <!-- Items here -->
+                        </div>
+                    </div>
+
+                    <!-- Real Column -->
+                    <div class="column real-column" id="col-real" ondrop="drop(event, 'real')" ondragover="allowDrop(event)">
+                        <div class="column-header">
+                            <h2>Real Detectada <span class="count-badge" id="count-real">0</span></h2>
+                        </div>
+                        <div class="column-content" id="list-real">
+                            <!-- Items here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Stats Tab -->
+            <section id="stats-tab" class="tab-content">
+                <div class="stats-dashboard">
+                    <div class="stat-card">
+                        <h3>Total Clasificadas</h3>
+                        <p id="stat-total">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Real</h3>
+                        <p id="stat-real">0</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3>IA</h3>
+                        <p id="stat-ia">0</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <div id="toast" class="toast hidden">Operación completada</div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

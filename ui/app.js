@@ -143,33 +143,51 @@ function setupUpload() {
 }
 
 function setupAccept() {
-    document.getElementById('accept-btn').addEventListener('click', async () => {
-        const items = [];
+    const modal = document.getElementById('confirmation-modal');
+    const modalCount = document.getElementById('modal-count');
+    const confirmBtn = document.getElementById('modal-confirm');
+    const cancelBtn = document.getElementById('modal-cancel');
+    let pendingItems = [];
+
+    // Open Modal
+    document.getElementById('accept-btn').addEventListener('click', () => {
+        pendingItems = [];
         
         // Gather items from IA column
         document.querySelectorAll('#list-ia .image-item').forEach(el => {
-            items.push({ filename: el.dataset.filename, label: 'ia' });
+            pendingItems.push({ filename: el.dataset.filename, label: 'ia' });
         });
         
         // Gather items from Real column
         document.querySelectorAll('#list-real .image-item').forEach(el => {
-            items.push({ filename: el.dataset.filename, label: 'real' });
+            pendingItems.push({ filename: el.dataset.filename, label: 'real' });
         });
         
-        if (items.length === 0) {
+        if (pendingItems.length === 0) {
             showToast('No hay imágenes para aceptar');
             return;
         }
         
-        if (!confirm(`¿Aceptar ${items.length} clasificaciones?`)) return;
-        
+        modalCount.textContent = pendingItems.length;
+        modal.classList.remove('hidden');
+    });
+
+    // Cancel Action
+    cancelBtn.addEventListener('click', () => {
+        modal.classList.add('hidden');
+        pendingItems = [];
+    });
+
+    // Confirm Action
+    confirmBtn.addEventListener('click', async () => {
+        modal.classList.add('hidden');
         showToast('Procesando...');
         
         try {
             const response = await fetch(`${API_BASE}/accept`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ items })
+                body: JSON.stringify({ items: pendingItems })
             });
             
             if (response.ok) {
@@ -178,11 +196,19 @@ function setupAccept() {
                 loadImages();
                 loadStats();
             } else {
-                showToast('Error al procesar');
+                const errData = await response.json();
+                showToast(`Error: ${errData.error || 'Error al procesar'}`);
             }
         } catch (error) {
             console.error(error);
             showToast('Error de conexión');
+        }
+    });
+    
+    // Close modal on outside click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.add('hidden');
         }
     });
 }

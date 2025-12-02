@@ -154,6 +154,30 @@
           <!-- Logs will appear here -->
         </div>
       </div>
+
+      <!-- Confirmation Modal -->
+      <div id="confirmation-modal" class="modal hidden">
+        <div class="modal-content">
+          <h3>Confirmar Clasificación</h3>
+          <p>
+            Se procesarán
+            <span id="modal-count" class="highlight">0</span> imágenes.
+            <br />
+            <span style="font-size: 0.9rem; color: var(--text-secondary)">
+              Las imágenes se moverán a sus carpetas correspondientes y el
+              sistema aprenderá de ellas.
+            </span>
+          </p>
+          <div class="modal-actions">
+            <button id="modal-cancel" class="action-btn secondary">
+              Cancelar
+            </button>
+            <button id="modal-confirm" class="action-btn success">
+              Confirmar
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
     <script src="app.js"></script>
   </body>

@@ -23,9 +23,12 @@ class DataManager:
         self._ensure_files()
 
     def _ensure_files(self):
-        # Ensure directories
-        self.paths["index"].parent.mkdir(parents=True, exist_ok=True)
-        self.paths["logs"].parent.mkdir(parents=True, exist_ok=True)
+        # Ensure all directories exist
+        for key, path in self.paths.items():
+            if key == "index" or key == "logs":
+                path.parent.mkdir(parents=True, exist_ok=True)
+            else:
+                path.mkdir(parents=True, exist_ok=True)
 
         if not self.paths["index"].exists():
             # Try to copy from bundled resource if frozen
@@ -99,6 +102,7 @@ class DataManager:
         Returns stats of processed items.
         """
         processed = {"real": 0, "ia": 0, "errors": 0}
+        print(f"DEBUG: Processing batch of {len(items)} items. Base path: {self.base_path}")
         
         index = self.load_index()
         
@@ -108,19 +112,35 @@ class DataManager:
             
             src = self.paths["entrada"] / filename
             if not src.exists():
-                print(f"File not found: {filename}")
+                print(f"ERROR: Source file not found: {src}")
                 processed["errors"] += 1
                 continue
                 
             dest_folder = self.paths[f"clasificaciones_{label}"]
             dest = dest_folder / filename
             
+            print(f"DEBUG: Moving {filename} to {label} folder: {dest_folder}")
+            
             try:
-                # Calculate hash
+                # Ensure destination folder exists
+                if not dest_folder.exists():
+                    print(f"DEBUG: Creating folder {dest_folder}")
+                    dest_folder.mkdir(parents=True, exist_ok=True)
+                
+                # Calculate hash before moving
                 file_hash = self.get_file_hash(src)
                 
-                # Move file
-                shutil.move(str(src), str(dest))
+                # Try move
+                try:
+                    shutil.move(str(src), str(dest))
+                except OSError as e:
+                    print(f"WARNING: Move failed ({e}), trying copy+delete...")
+                    shutil.copy2(str(src), str(dest))
+                    os.remove(str(src))
+                
+                # Verify move
+                if not dest.exists():
+                    raise Exception(f"Destination file {dest} does not exist after move/copy")
                 
                 # Update index
                 entry = {
@@ -141,9 +161,12 @@ class DataManager:
                 })
                 
                 processed[label] += 1
+                print(f"SUCCESS: Processed {filename}")
                 
             except Exception as e:
-                print(f"Error processing {filename}: {e}")
+                print(f"ERROR: Failed to process {filename}: {e}")
+                import traceback
+                traceback.print_exc()
                 processed["errors"] += 1
                 
         self.save_index(index)

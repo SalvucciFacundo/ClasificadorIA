@@ -11,25 +11,42 @@ import time
 # Configuration
 if getattr(sys, 'frozen', False):
     # Running as compiled exe
-    EXE_DIR = os.path.dirname(sys.executable)
+    if hasattr(sys, '_MEIPASS'):
+        # Check if resources are bundled (Normal Exe)
+        bundled_ui = os.path.join(sys._MEIPASS, 'ui')
+        if os.path.exists(bundled_ui):
+            # Normal Mode: Use bundled resources
+            UI_DIR = bundled_ui
+            LOGIC_DIR = os.path.join(sys._MEIPASS, 'logic')
+            DATA_DIR = os.path.dirname(sys.executable) # Data always external
+        else:
+            # Optimized Mode: Resources are external
+            EXE_DIR = os.path.dirname(sys.executable)
+            UI_DIR = os.path.join(EXE_DIR, 'ui')
+            LOGIC_DIR = os.path.join(EXE_DIR, 'logic')
+            DATA_DIR = EXE_DIR
+    else:
+        # OneDir mode
+        EXE_DIR = os.path.dirname(sys.executable)
+        UI_DIR = os.path.join(EXE_DIR, 'ui')
+        LOGIC_DIR = os.path.join(EXE_DIR, 'logic')
+        DATA_DIR = EXE_DIR
 else:
     # Running as script
     EXE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# Define external paths
-UI_DIR = os.path.join(EXE_DIR, 'ui')
-LOGIC_DIR = os.path.join(EXE_DIR, 'logic')
-DATA_DIR = EXE_DIR
+    UI_DIR = os.path.join(EXE_DIR, 'ui')
+    LOGIC_DIR = os.path.join(EXE_DIR, 'logic')
+    DATA_DIR = EXE_DIR
 
 # Check for UI directory
 if not os.path.exists(UI_DIR):
     # Fallback for development (if 'interfaz' exists in current dir)
-    dev_ui = os.path.join(EXE_DIR, 'interfaz')
+    dev_ui = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'interfaz')
     if not getattr(sys, 'frozen', False) and os.path.exists(dev_ui):
         UI_DIR = dev_ui
         print(f"Using development UI at: {UI_DIR}")
     else:
-        print("Archivo de interfaz no encontrado. Verificar carpeta externa 'ui/'.")
+        print(f"Archivo de interfaz no encontrado en: {UI_DIR}")
         # We continue, but Flask might fail if accessed.
 
 # Logging System
@@ -125,6 +142,7 @@ except Exception as e:
 app = Flask(__name__, static_folder=UI_DIR, template_folder=UI_DIR)
 
 # Managers Initialization
+print(f"DEBUG: Initializing managers with DATA_DIR: {DATA_DIR}")
 dm = DataManager(DATA_DIR)
 mm = ModelManager(os.path.join(DATA_DIR, "modelo", "modelo_actual.pth"))
 
